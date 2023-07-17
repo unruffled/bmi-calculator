@@ -4,12 +4,9 @@ pipeline {
     stages {
         stage('SCA - SonarQube Analysis') {
             steps {
-                script {
-                    // SonarQube analysis configuration
-                    def scannerHome = tool 'SonarQubeScanner'
-                    withSonarQubeEnv('sonarqube-9.9.1') {
-                        sh "./mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar"
-                    }
+                // SonarQube analysis configuration
+                withSonarQubeEnv('sonarqube-9.9.1') {
+                    sh "./mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar"
                 }
             }
         }
