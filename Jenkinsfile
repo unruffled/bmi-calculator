@@ -7,7 +7,7 @@ pipeline {
                 script {
                     // SonarQube analysis configuration
                     def scannerHome = tool 'SonarQubeScanner'
-                    withSonarQubeEnv('sonarqube-9.9.1') {
+                    withSonarQubeEnv(installationName:'sonarqube-9.9.1',credentialsID:'jenkins-sonar') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
