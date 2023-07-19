@@ -75,4 +75,15 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            // Run SonarQube analysis
+            script {
+                withSonarQubeEnv('sonarqube-9.9.1') {
+                    sh 'sonar-scanner'
+                }
+            }
+        }
+    }
 }
