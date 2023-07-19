@@ -81,7 +81,7 @@ pipeline {
             // Run SonarQube analysis
             script {
                 withSonarQubeEnv('sonarqube-9.9.1') {
-                    sh 'sonar-scanner'
+                    sh '/usr/local/bin/sonar-scanner'
                 }
             }
         }
