@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Continuous Integration') {
+            agent {
+                docker {
+                    image 'node:16.13.1-alpine'
+                }
+            }
+            stages {
+                stage('NPM Install') {
+                    steps {
+                        script {
+                            // Verify node version
+                            sh 'node --version'
+                        }
+                        // Perform npm install using npm ci command
+                        sh 'npm ci'
+                    }
+                }
+
+                stage('Unit Tests Execution') {
+                    steps {
+                        // Execute unit tests and code coverage
+                        sh 'npm run test -- --coverage --watchAll=false'
+                    }
+                    post {
+                        always {
+                            // Wait for Quality Gate based on minimum line coverage of 40%
+                            script {
+                                def qg = waitForQualityGate()
+                                if (qg.status != 'OK') {
+                                    error "Unit Tests Execution failed due to Quality Gate failure: ${qg.status}"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('Code Coverage') {
+                    steps {
+                        // Configure code coverage threshold
+                        step([
+                            $class: 'CoberturaPublisher',
+                            coberturaReportFile: '**/coverage/cobertura-coverage.xml',
+                            failUnhealthy: false,
+                            failUnstable: false,
+                            lineCoverageTargets: '40,',
+                            autoUpdateHealth: false,
+                            autoUpdateStability: false
+                        ])
+                    }
+                    post {
+                        always {
+                            // Wait for Quality Gate based on minimum line coverage of 40%
+                            script {
+                                def qg = waitForQualityGate()
+                                if (qg.status != 'OK') {
+                                    error "Code Coverage failed due to Quality Gate failure: ${qg.status}"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    // Build the Node.js and React app using npm
+                    sh 'npm run build' // Build the app
+                }
+            }
+        }
+    }
+}
